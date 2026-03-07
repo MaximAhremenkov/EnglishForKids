@@ -108,3 +108,6 @@ C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\R
 C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\Razor\Views\Admin\Topics.cshtml.g.cs
 C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\Razor\Views\Admin\_LayoutAdmin.cshtml.g.cs
 C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\Razor\Views\Admin\_ViewImports.cshtml.g.cs
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\Razor\Views\Admin\CreateOption.cshtml.g.cs
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\Razor\Views\Admin\EditQuestion.cshtml.g.cs
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\Razor\Views\Admin\EditTopic.cshtml.g.cs

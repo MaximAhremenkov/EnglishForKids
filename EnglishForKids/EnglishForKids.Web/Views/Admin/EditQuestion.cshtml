@@ -1,0 +1,111 @@
+﻿@using EnglishForKids.Data.Enums
+@model EnglishForKids.Data.Entities.Question
+@{
+    ViewData["Title"] = "Редактирование вопроса";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4>✏️ Редактирование вопроса</h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Тема:</dt>
+                        <dd class="col-sm-9">@Model.Topic?.Title</dd>
+
+                        <dt class="col-sm-3">Тип вопроса:</dt>
+                        <dd class="col-sm-9">
+                            @switch (Model.QuestionType)
+                            {
+                                case QuestionType.TrueFalse:<span>✅ Правда/Ложь</span> break;
+                                case QuestionType.MultipleChoice: <span>❓ Множественный выбор</span> break;
+                                case QuestionType.Spelling: <span>📝 Вставь букву</span> break;
+                                case QuestionType.Translation: <span>🔄 Перевод</span> break;
+                                case QuestionType.SentenceBuilder: <span>🧩 Составь предложение</span>break;
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">Текст вопроса:</dt>
+                        <dd class="col-sm-9">@Model.Text</dd>
+
+                        <dt class="col-sm-3">Сложность:</dt>
+                        <dd class="col-sm-9">
+                            @switch (Model.Difficulty)
+                            {
+                                case DifficultyLevel.Easy:<span class="badge bg-success">Легкий</span> break;
+                                case DifficultyLevel.Medium: <span class="badge bg-warning">Средний</span> break;
+                                case DifficultyLevel.Hard: <span class="badge bg-danger">Сложный</span>break;
+                            }
+                        </dd>
+                    </dl>
+
+                    <hr />
+
+                    <h5 class="mb-3">Варианты ответов</h5>
+
+                    @if (Model.QuestionType == QuestionType.MultipleChoice || Model.QuestionType == QuestionType.Translation)
+                    {
+                        @if (Model.Options != null && Model.Options.Any())
+                        {
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Порядок</th>
+                                        <th>Текст</th>
+                                        <th>Правильный</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var opt in Model.Options.OrderBy(o => o.Order))
+                                    {
+                                        <tr>
+                                            <td>@opt.Order</td>
+                                            <td>@opt.Text</td>
+                                            <td>
+                                                @if (opt.IsCorrect)
+                                                {
+                                                    <span class="badge bg-success">Да</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Нет</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                Нет вариантов ответа.
+                                <a href="/Admin/CreateOption?questionId=@Model.Id" class="alert-link">Добавить вариант</a>
+                            </div>
+                        }
+
+                        <a href="/Admin/CreateOption?questionId=@Model.Id" class="btn btn-success btn-sm">
+                            ➕ Добавить вариант
+                        </a>
+                    }
+                    else if (Model.QuestionType == QuestionType.TrueFalse)
+                    {
+                        <div class="alert alert-info">
+                            Правильный ответ: <strong>@(Model.IsTrueStatement == true ? "ПРАВДА" : "ЛОЖЬ")</strong>
+                        </div>
+                    }
+
+                    <hr />
+
+                    <div class="mt-4">
+                        <a href="/Admin/Questions" class="btn btn-secondary">↩️ Назад к списку</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -17,6 +17,7 @@
 
 	<ItemGroup>
 	  <Folder Include="wwwroot\images\topics\" />
+	  <Folder Include="wwwroot\images\logo\" />
 	  <Folder Include="wwwroot\sounds\" />
 	</ItemGroup>
 
