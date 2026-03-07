@@ -1,0 +1,59 @@
+﻿@model EnglishForKids.Web.ViewModels.OptionAdminViewModel
+@{
+    ViewData["Title"] = "Добавление варианта ответа";
+    Layout = "_LayoutAdmin";
+    var question = ViewBag.Question as EnglishForKids.Data.Entities.Question;
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4>➕ Добавление варианта ответа</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Вопрос:</strong> @question?.Text
+                    </div>
+
+                    <form method="post">
+                        <input type="hidden" asp-for="QuestionId" />
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Text" class="form-label">Текст варианта</label>
+                            <input asp-for="Text" class="form-control" required />
+                            <span asp-validation-for="Text" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Order" class="form-label">Порядок</label>
+                                <input asp-for="Order" type="number" class="form-control" min="1" value="1" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="IsCorrect" class="form-label">Правильный ответ?</label>
+                                <select asp-for="IsCorrect" class="form-select">
+                                    <option value="true">Да</option>
+                                    <option value="false">Нет</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-success">✅ Сохранить</button>
+                            <a href="/Admin/EditQuestion/@Model.QuestionId" class="btn btn-secondary">↩️ Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
