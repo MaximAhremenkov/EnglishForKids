@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "Учи английский с удовольствием!";
+}
+
+<div class="container text-center mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-3 mb-4">Добро пожаловать в мир английского! 🌟</h1>
+            <p class="lead mb-5">Учиться весело с нашими играми и заданиями!</p>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-4 mb-4">
+            <div class="topic-card" onclick="location.href='/Topic'">
+                <div class="topic-icon">
+                    📚
+                </div>
+                <h3>Уроки</h3>
+                <p>Изучай новые темы с правилами и примерами</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="topic-card" onclick="location.href='/Game'">
+                <div class="topic-icon">
+                    🎮
+                </div>
+                <h3>Игры</h3>
+                <p>Закрепляй знания в увлекательных играх</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="topic-card" onclick="location.href='/Progress'">
+                <div class="topic-icon">
+                    📊
+                </div>
+                <h3>Прогресс</h3>
+                <p>Следи за своими успехами и наградами</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="question-area">
+                <h2>Сегодня рекомендуем:</h2>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="option-card">
+                            <h4>Глагол to be</h4>
+                            <p>am, is, are - учимся правильно использовать</p>
+                            <button class="btn btn-primary btn-lg" onclick="location.href='/Topic/Details/1'">Начать</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="option-card">
+                            <h4>Алфавит</h4>
+                            <p>Буквы и звуки с веселыми картинками</p>
+                            <button class="btn btn-primary btn-lg" onclick="location.href='/Topic/Details/2'">Начать</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Анимация маскота
+    const mascot = document.getElementById('mascot');
+    const speech = document.getElementById('mascotSpeech');
+    const phrases = [
+        'Привет!',
+        'Давай учиться!',
+        'Ты молодец!',
+        'Попробуй еще!',
+        'Отлично!'
+    ];
+
+    setInterval(() => {
+        speech.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+        speech.style.display = 'block';
+        setTimeout(() => {
+            speech.style.display = 'none';
+        }, 3000);
+    }, 8000);
+</script>

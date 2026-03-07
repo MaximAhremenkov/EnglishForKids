@@ -1,0 +1,122 @@
+﻿@model EnglishForKids.Web.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Админ-панель";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="container-fluid mt-4">
+    <h1 class="mb-4">👨‍💼 Админ-панель</h1>
+
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Пользователи</h5>
+                    <h2 class="card-text">@Model.TotalUsers</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Дети</h5>
+                    <h2 class="card-text">@Model.TotalChildren</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Темы</h5>
+                    <h2 class="card-text">@Model.TotalTopics</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Вопросы</h5>
+                    <h2 class="card-text">@Model.TotalQuestions</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Навигация -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Управление контентом</h5>
+                </div>
+                <div class="card-body">
+                    <a href="/Admin/Topics" class="btn btn-outline-primary btn-lg m-2">📚 Темы</a>
+                    <a href="/Admin/Questions" class="btn btn-outline-success btn-lg m-2">❓ Вопросы</a>
+                    <a href="/Admin/Users" class="btn btn-outline-info btn-lg m-2">👥 Пользователи</a>
+                    <a href="/Admin/Statistics" class="btn btn-outline-warning btn-lg m-2">📊 Статистика</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Последние темы -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Последние темы</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Название</th>
+                                <th>Категория</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var topic in Model.RecentTopics)
+                            {
+                                <tr>
+                                    <td>@topic.Id</td>
+                                    <td>@topic.Title</td>
+                                    <td>@topic.Category?.Name</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Последние дети</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Имя</th>
+                                <th>Родитель</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var child in Model.RecentChildren)
+                            {
+                                <tr>
+                                    <td>@child.Id</td>
+                                    <td>@child.Name</td>
+                                    <td>@child.Parent?.Email</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

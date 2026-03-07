@@ -1,0 +1,79 @@
+﻿@{
+    ViewData["Title"] = "Добавить ребенка";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="question-area">
+                <h2 class="text-center mb-4">👶 Добавить ребенка</h2>
+
+                <form method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Имя ребенка</label>
+                            <input type="text" name="name" class="form-control form-control-lg" required>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Возраст</label>
+                            <input type="number" name="age" class="form-control form-control-lg" min="4" max="12" required>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Класс</label>
+                            <select name="grade" class="form-select form-select-lg">
+                                <option value="1">1 класс</option>
+                                <option value="2">2 класс</option>
+                                <option value="3">3 класс</option>
+                                <option value="4">4 класс</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Выбери аватарку</label>
+                        <div class="row">
+                            @for (int i = 1; i <= 6; i++)
+                            {
+                                <div class="col-4 col-md-2 mb-2">
+                                    <div class="avatar-option" onclick="selectAvatar(@i)">
+                                        <img src="/images/avatars/child@(i).png" class="img-fluid rounded-circle border" style="cursor: pointer;">
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <input type="hidden" name="avatar" id="selectedAvatar" value="/images/avatars/child1.png">
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-lg w-100">Добавить ребенка</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function selectAvatar(num) {
+    document.getElementById('selectedAvatar').value = '/images/avatars/child' + num + '.png';
+
+    // Подсветка выбранного
+    document.querySelectorAll('.avatar-option').forEach(el => {
+        el.classList.remove('selected');
+    });
+    event.currentTarget.classList.add('selected');
+}
+</script>
+
+<style>
+    .avatar-option {
+        padding: 5px;
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+
+        .avatar-option.selected {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 3px #7CCF7C;
+        }
+</style>

@@ -1,0 +1,254 @@
+﻿@model EnglishForKids.Data.Entities.VirtualPet
+
+@{
+    ViewData["Title"] = "Мой питомец";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="pet-card text-center p-5">
+                <h1 class="mb-4">🐾 Мой питомец</h1>
+
+                <!-- Изображение питомца -->
+                <div class="pet-image mb-4" id="petImage">
+                    @switch (Model.PetType)
+                    {
+                        case "Дракончик":
+                            <img src="/images/pets/dragon.png" alt="Дракончик" class="img-fluid" style="max-height: 200px;">
+                            break;
+                        case "Енот":
+                            <img src="/images/pets/raccoon.png" alt="Енот" class="img-fluid" style="max-height: 200px;">
+                            break;
+                        case "Совенок":
+                            <img src="/images/pets/owl.png" alt="Совенок" class="img-fluid" style="max-height: 200px;">
+                            break;
+                        case "Панда":
+                            <img src="/images/pets/panda.png" alt="Панда" class="img-fluid" style="max-height: 200px;">
+                            break;
+                        case "Лисенок":
+                            <img src="/images/pets/fox.png" alt="Лисенок" class="img-fluid" style="max-height: 200px;">
+                            break;
+                        default:
+                            <img src="/images/pets/default.png" alt="Питомец" class="img-fluid" style="max-height: 200px;">
+                            break;
+                    }
+                </div>
+
+                <!-- Имя и уровень -->
+                <h2 id="petName">@Model.PetName</h2>
+                <div class="badge bg-warning fs-5 mb-3">Уровень <span id="petLevel">@Model.Level</span></div>
+
+                <!-- Полоски характеристик -->
+                <div class="stats mb-4">
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>😊 Счастье</span>
+                            <span id="happinessValue">@Model.Happiness%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" id="happinessBar" style="width: @Model.Happiness%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>🍖 Сытость</span>
+                            <span id="foodValue">@Model.Food%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" id="foodBar" style="width: @Model.Food%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>⚡ Энергия</span>
+                            <span id="energyValue">@Model.Energy%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" id="energyBar" style="width: @Model.Energy%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>⭐ Опыт</span>
+                            <span id="expValue">@Model.Experience / @(Model.Level * 100)</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-primary" id="expBar" style="width: @((Model.Experience * 100.0) / (Model.Level * 100))%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Кнопки действий -->
+                <div class="actions d-flex justify-content-center gap-3">
+                    <button id="feedBtn" class="btn btn-success btn-lg">
+                        🍎 Покормить
+                    </button>
+                    <button id="playBtn" class="btn btn-primary btn-lg">
+                        🎾 Поиграть
+                    </button>
+                </div>
+
+                <!-- Сообщения -->
+                <div id="petMessage" class="mt-4" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Кнопки
+        const feedBtn = document.getElementById('feedBtn');
+        const playBtn = document.getElementById('playBtn');
+        const petMessage = document.getElementById('petMessage');
+
+        // Показатели
+        const happinessBar = document.getElementById('happinessBar');
+        const happinessValue = document.getElementById('happinessValue');
+        const foodBar = document.getElementById('foodBar');
+        const foodValue = document.getElementById('foodValue');
+        const energyBar = document.getElementById('energyBar');
+        const energyValue = document.getElementById('energyValue');
+        const expBar = document.getElementById('expBar');
+        const expValue = document.getElementById('expValue');
+        const petLevel = document.getElementById('petLevel');
+
+        // Покормить
+        feedBtn.addEventListener('click', function () {
+            fetch('/Pet/Feed', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': getAntiForgeryToken()
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Обновляем показатели
+                        foodBar.style.width = data.food + '%';
+                        foodValue.textContent = data.food + '%';
+                        happinessBar.style.width = data.happiness + '%';
+                        happinessValue.textContent = data.happiness + '%';
+
+                        showMessage('Питомец покормлен! 🍎', 'success');
+                    } else {
+                        showMessage(data.message || 'Ошибка', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showMessage('Ошибка соединения', 'danger');
+                });
+        });
+
+        // Поиграть
+        playBtn.addEventListener('click', function () {
+            fetch('/Pet/Play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': getAntiForgeryToken()
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Обновляем показатели
+                        happinessBar.style.width = data.happiness + '%';
+                        happinessValue.textContent = data.happiness + '%';
+                        energyBar.style.width = data.energy + '%';
+                        energyValue.textContent = data.energy + '%';
+
+                        if (data.level > parseInt(petLevel.textContent)) {
+                            petLevel.textContent = data.level;
+                            showMessage('Уровень повышен! 🎉', 'success');
+                        } else {
+                            showMessage('Питомец счастлив! 🎾', 'success');
+                        }
+
+                        // Обновляем опыт
+                        const expPercent = (data.experience * 100 / (data.level * 100));
+                        expBar.style.width = expPercent + '%';
+                        expValue.textContent = data.experience + ' / ' + (data.level * 100);
+                    } else {
+                        showMessage(data.message || 'Ошибка', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showMessage('Ошибка соединения', 'danger');
+                });
+        });
+
+        function showMessage(text, type) {
+            petMessage.style.display = 'block';
+            petMessage.className = 'alert alert-' + type + ' mt-4';
+            petMessage.textContent = text;
+
+            setTimeout(() => {
+                petMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        function getAntiForgeryToken() {
+            const tokens = document.cookie.split(';')
+                .map(c => c.trim())
+                .filter(c => c.startsWith('.AspNetCore.Antiforgery.'))
+                .map(c => c.split('=')[1]);
+
+            return tokens.length > 0 ? tokens[0] : '';
+        }
+    </script>
+}
+
+<style>
+    .pet-card {
+        background: white;
+        border-radius: 50px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+
+    .pet-image {
+        animation: bounce 2s infinite;
+    }
+
+    .stat-item {
+        text-align: left;
+    }
+
+    .progress {
+        height: 20px;
+        border-radius: 10px;
+    }
+
+    .btn {
+        padding: 1rem 2rem;
+        font-size: 1.3rem;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+    @@keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+</style>

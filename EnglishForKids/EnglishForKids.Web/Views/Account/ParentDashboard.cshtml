@@ -1,0 +1,124 @@
+﻿@model IEnumerable<EnglishForKids.Data.Entities.ChildProfile>
+
+@{
+    ViewData["Title"] = "Личный кабинет родителя";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-5">👨‍👩‍👧 Мой кабинет</h1>
+
+    <!-- ДОБАВЬТЕ ЭТОТ БЛОК для отображения email родителя -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <strong>Ваш email:</strong> @User.Identity.Name
+                <p class="mb-0 small">Сообщите этот email ребенку для входа</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ДОБАВЬТЕ ЭТОТ БЛОК для сообщения об успешном добавлении -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-12">
+            <a href="/Account/AddChild" class="btn btn-success btn-lg mb-4">➕ Добавить ребенка</a>
+        </div>
+    </div>
+
+    <div class="row">
+        @foreach (var child in Model)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="topic-card">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="@child.AvatarUrl" alt="@child.Name" class="avatar-circle me-3">
+                        <div>
+                            <h3>@child.Name</h3>
+                            <p class="mb-0">Возраст: @child.Age, @child.Grade класс</p>
+                            <!-- УЖЕ ЕСТЬ: PIN-код отображается -->
+                            <p class="mb-0">
+                                <strong>PIN:</strong> <span class="badge bg-light text-dark p-2">@child.PinCode</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="progress mb-3">
+                        <div class="progress-bar" style="width: @(child.Progresses.Any() ? child.Progresses.Average(p => p.CorrectAnswers * 100.0 / (p.TotalQuestions == 0 ? 1 : p.TotalQuestions)) : 0)%">
+                            Общий прогресс
+                        </div>
+                    </div>
+
+                    <h5>📊 Прогресс по темам:</h5>
+                    <div class="list-group mb-3">
+                        @foreach (var progress in child.Progresses.Take(3))
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>@progress.Topic.Title</span>
+                                    <span>⭐ @progress.StarsEarned/3</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: @(progress.CorrectAnswers * 100.0 / (progress.TotalQuestions == 0 ? 1 : progress.TotalQuestions))%"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-primary">📊 Подробнее</a>
+                        <a href="#" class="btn btn-warning">🐶 Питомец</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="question-area">
+                <h4>🖨 Распечатай и играй</h4>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="#" class="btn btn-outline-primary">📚 Карточки</a>
+                    <a href="#" class="btn btn-outline-success">🎨 Раскраски</a>
+                    <a href="#" class="btn btn-outline-warning">📝 Прописи</a>
+                    <a href="#" class="btn btn-outline-info">🔤 Алфавит</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="question-area">
+                <h4>⏰ Настройки</h4>
+                <div class="mb-3">
+                    <label class="form-label">Ограничение по времени (минут в день):</label>
+                    <input type="range" class="form-range" min="15" max="120" value="60" id="timeRange">
+                    <div class="text-center">
+                        <span id="timeValue" class="badge bg-info fs-5">60 минут</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ДОБАВЬТЕ ЭТОТ СКРИПТ для ползунка времени -->
+<script>
+    const timeRange = document.getElementById('timeRange');
+    const timeValue = document.getElementById('timeValue');
+
+    if (timeRange) {
+        timeRange.addEventListener('input', function() {
+            timeValue.textContent = this.value + ' минут';
+        });
+    }
+</script>

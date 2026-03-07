@@ -1,0 +1,303 @@
+﻿@model EnglishForKids.Web.ViewModels.GameViewModel
+@{
+    ViewData["Title"] = "Перевод слов";
+}
+
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>@Model.TopicTitle</h2>
+                <div>
+                    <span class="badge bg-warning fs-4" id="scoreDisplay">⭐ @Model.Score</span>
+                    <span class="badge bg-info fs-4" id="questionCounter">@(Model.CurrentQuestionIndex+1)/@Model.TotalQuestions</span>
+                </div>
+            </div>
+
+            <div class="progress mb-4">
+                <div class="progress-bar" id="progressBar" style="width: @((Model.CurrentQuestionIndex) * 100.0 / Model.TotalQuestions)%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container" data-questionid="@Model.CurrentQuestion.Id">
+        <div class="question-area text-center">
+            <div class="english-word display-1 mb-4" id="englishWord">
+                @Model.CurrentQuestion.Text
+            </div>
+
+            <button id="playSoundBtn" class="btn btn-outline-primary btn-lg mb-4">
+                🔊 Послушать слово
+            </button>
+
+            <p class="lead text-muted">Выбери правильный перевод:</p>
+        </div>
+
+        <div class="row mt-4" id="optionsContainer">
+            @if (Model.CurrentQuestion.Options != null)
+            {
+                var options = Model.CurrentQuestion.Options.OrderBy(o => o.Order).ToList();
+                for (int i = 0; i < options.Count; i++)
+                {
+                    <div class="col-md-6 mb-3">
+                        <button class="option-btn btn btn-primary btn-lg w-100"
+                                data-option-id="@options[i].Id"
+                                data-is-correct="@options[i].IsCorrect.ToString().ToLower()">
+                            <span class="option-letter">@((char)('А' + i))</span>
+                            <span class="option-text">@options[i].Text</span>
+                        </button>
+                    </div>
+                }
+            }
+        </div>
+
+        <div id="feedback" class="text-center mt-4" style="display: none;">
+            <h2 id="feedbackMessage"></h2>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Элементы
+        const container = document.getElementById('game-container');
+        const englishWord = document.getElementById('englishWord');
+        const playSoundBtn = document.getElementById('playSoundBtn');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const feedback = document.getElementById('feedback');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const progressBar = document.getElementById('progressBar');
+        const questionCounter = document.getElementById('questionCounter');
+
+        let currentQuestionId = parseInt(container.dataset.questionid);
+        let answered = false;
+        let startTime = Date.now();
+        let nextQuestionTimeout = null;
+
+        console.log('GameMode4 загружен, ID вопроса:', currentQuestionId);
+
+        // Озвучка слова
+        playSoundBtn.addEventListener('click', function () {
+            const utterance = new SpeechSynthesisUtterance(englishWord.textContent);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        });
+
+        // Делегирование событий
+        optionsContainer.addEventListener('click', function (e) {
+            const button = e.target.closest('.option-btn');
+            if (button && !answered) {
+                console.log('Клик по кнопке');
+                checkAnswer(button);
+            }
+        });
+
+        function checkAnswer(selectedButton) {
+            if (nextQuestionTimeout) {
+                clearTimeout(nextQuestionTimeout);
+            }
+
+            answered = true;
+            const answerTime = Math.floor((Date.now() - startTime) / 1000);
+            const isCorrect = selectedButton.dataset.isCorrect === 'true';
+
+            console.log('Ответ:', isCorrect ? 'правильный' : 'неправильный');
+
+            // Блокируем все кнопки
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+
+            // Подсветка
+            if (isCorrect) {
+                selectedButton.classList.add('btn-success');
+                selectedButton.classList.remove('btn-primary');
+            } else {
+                selectedButton.classList.add('btn-danger');
+                selectedButton.classList.remove('btn-primary');
+
+                // Подсвечиваем правильный ответ
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    if (btn.dataset.isCorrect === 'true') {
+                        btn.classList.add('btn-success');
+                        btn.classList.remove('btn-primary');
+                    }
+                });
+            }
+
+            // Показываем результат
+            feedback.style.display = 'block';
+            feedback.className = isCorrect ? 'alert alert-success text-center mt-4' : 'alert alert-danger text-center mt-4';
+            feedbackMessage.innerHTML = isCorrect ? '🎉 Правильно!' : '😕 Неправильно!';
+
+            // Отправляем результат
+            fetch('/Game/CheckAnswer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    questionId: currentQuestionId,
+                    isCorrect: isCorrect,
+                    answerTime: answerTime
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Ответ сервера:', data);
+
+                    if (data.success) {
+                        if (data.score !== undefined) {
+                            scoreDisplay.innerHTML = '⭐ ' + data.score;
+                        }
+                        if (data.currentIndex !== undefined && data.totalQuestions !== undefined) {
+                            const progress = (data.currentIndex * 100 / data.totalQuestions);
+                            progressBar.style.width = progress + '%';
+                            questionCounter.textContent = (data.currentIndex + 1) + '/' + data.totalQuestions;
+                        }
+
+                        if (data.hasNext) {
+                            nextQuestionTimeout = setTimeout(() => {
+                                updateQuestion(data.question);
+                            }, 1500);
+                        } else {
+                            setTimeout(() => window.location.href = data.redirect, 2000);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    setTimeout(() => location.reload(), 2000);
+                });
+        }
+
+        function updateQuestion(question) {
+            console.log('Обновление вопроса:', question);
+
+            currentQuestionId = question.id;
+            englishWord.textContent = question.text;
+
+            // Проверяем наличие вариантов
+            if (!question.options || question.options.length === 0) {
+                console.error('Нет вариантов ответа!');
+                optionsContainer.innerHTML = '<div class="col-12"><div class="alert alert-danger">Нет вариантов ответа</div></div>';
+                return;
+            }
+
+            // Полностью пересоздаём контейнер с кнопками
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach((opt, index) => {
+                const col = document.createElement('div');
+                col.className = 'col-md-6 mb-3';
+
+                const button = document.createElement('button');
+                button.className = 'option-btn btn btn-primary btn-lg w-100';
+                button.dataset.optionId = opt.id;
+                button.dataset.isCorrect = opt.isCorrect.toString().toLowerCase();
+
+                const letters = ['А', 'Б', 'В', 'Г'];
+                button.innerHTML = `
+                        <span class="option-letter">${letters[index]}</span>
+                        <span class="option-text">${opt.text}</span>
+                    `;
+
+                col.appendChild(button);
+                optionsContainer.appendChild(col);
+            });
+
+            // Сбрасываем ВСЕ состояния
+            feedback.style.display = 'none';
+            feedback.className = '';
+            feedbackMessage.innerHTML = '';
+
+            // ВАЖНО: Убеждаемся, что все кнопки активны
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('btn-success', 'btn-danger');
+                btn.classList.add('btn-primary');
+            });
+
+            answered = false;
+            startTime = Date.now();
+            nextQuestionTimeout = null;
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            console.log('Готов к следующему вопросу, answered =', answered);
+        }
+    </script>
+}
+
+<style>
+    .english-word {
+        font-family: 'Comfortaa', cursive;
+        font-size: 4rem;
+        font-weight: bold;
+        color: #2c3e50;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .option-btn {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 1rem;
+        font-size: 1.5rem;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        border: none;
+    }
+
+        .option-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .option-btn:active {
+            transform: scale(0.95);
+        }
+
+        .option-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+            .option-btn:disabled:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+    .option-letter {
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-weight: bold;
+        font-size: 1.8rem;
+    }
+
+    .option-text {
+        flex: 1;
+        font-size: 1.5rem;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #27ae60, #229954) !important;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+    }
+
+    .alert-success, .alert-danger {
+        font-size: 1.5rem;
+        padding: 1rem;
+        border-radius: 50px;
+    }
+</style>

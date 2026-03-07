@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Результат игры";
+    var topicId = ViewBag.TopicId;
+    var score = ViewBag.Score;
+    var stars = ViewBag.Stars;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="text-center p-5" style="background: white; border-radius: 50px; box-shadow: 0 15px 25px rgba(0,0,0,0.1);">
+                <h1 class="display-3 mb-4">Игра завершена! 🎉</h1>
+
+                <div style="width: 200px; height: 200px; margin: 0 auto; border-radius: 50%; background: linear-gradient(135deg, #FFD700, #FFA500); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
+                    <span style="font-size: 4rem;">@score</span>
+                    <span style="font-size: 2rem;">/@((score / 10) * 10)</span>
+                </div>
+
+                <div class="my-4">
+                    @for (int i = 0; i < stars; i++)
+                    {
+                        <span style="font-size: 4rem; animation: twinkle 1s infinite;">⭐</span>
+                    }
+                    @for (int i = stars; i < 3; i++)
+                    {
+                        <span style="font-size: 4rem; opacity: 0.3;">⭐</span>
+                    }
+                </div>
+
+                <h2 class="mb-4">
+                    @if (stars == 3)
+                    {
+                        <span>🌟 ТЫ СУПЕР! 🌟</span>
+                    }
+                    else if (stars == 2)
+                    {
+                        <span>✨ Хороший результат! ✨</span>
+                    }
+                    else if (stars == 1)
+                    {
+                        <span>🌱 Неплохо, попробуй еще! 🌱</span>
+                    }
+                    else
+                    {
+                        <span>💪 В следующий раз получится лучше! 💪</span>
+                    }
+                </h2>
+
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="/Game/SelectMode/@topicId" class="btn btn-success btn-lg">🎮 Играть еще</a>
+                    <a href="/Topic" class="btn btn-primary btn-lg">📚 Другие темы</a>
+                    <a href="/Account/ChildDashboard" class="btn btn-info btn-lg">👶 В кабинет</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@keyframes twinkle {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>

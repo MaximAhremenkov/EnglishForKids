@@ -1,0 +1,223 @@
+﻿@model EnglishForKids.Web.ViewModels.GameViewModel
+@{
+    ViewData["Title"] = "Правда или Ложь";
+}
+
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>@Model.TopicTitle</h2>
+                <div>
+                    <span class="badge bg-warning fs-4" id="scoreDisplay">⭐ @Model.Score</span>
+                    <span class="badge bg-info fs-4">@(Model.CurrentQuestionIndex+1)/@Model.TotalQuestions</span>
+                </div>
+            </div>
+
+            <div class="progress mb-4">
+                <div class="progress-bar" id="progressBar" style="width: @((Model.CurrentQuestionIndex) * 100.0 / Model.TotalQuestions)%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container"
+         data-questionid="@Model.CurrentQuestion.Id"
+         data-iscorrect="@(Model.CurrentQuestion.IsTrueStatement.HasValue ? Model.CurrentQuestion.IsTrueStatement.Value.ToString().ToLower() : "false")">
+
+        <div class="question-area text-center">
+            <h2 class="display-5 mb-4">@Model.CurrentQuestion.Text</h2>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-6">
+                <button id="trueBtn" class="btn btn-success btn-lg w-100" style="font-size: 2rem; padding: 1.5rem;">✅ ПРАВДА</button>
+            </div>
+            <div class="col-6">
+                <button id="falseBtn" class="btn btn-danger btn-lg w-100" style="font-size: 2rem; padding: 1.5rem;">❌ ЛОЖЬ</button>
+            </div>
+        </div>
+
+        <div id="feedback" class="text-center mt-4" style="display: none;">
+            <h2 id="feedbackMessage"></h2>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Получаем данные
+        const container = document.getElementById('game-container');
+        const questionId = parseInt(container.dataset.questionid);
+        const isCorrect = container.dataset.iscorrect === 'true';
+
+        // Кнопки
+        const trueBtn = document.getElementById('trueBtn');
+        const falseBtn = document.getElementById('falseBtn');
+        const feedback = document.getElementById('feedback');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+
+        let answered = false;
+        let startTime = Date.now();
+
+        // Функция обработки ответа
+        function checkAnswer(userChoice) {
+            if (answered) return;
+
+            answered = true;
+            const answerTime = Math.floor((Date.now() - startTime) / 1000);
+            const correct = (userChoice === isCorrect);
+
+            // Блокируем кнопки
+            trueBtn.disabled = true;
+            falseBtn.disabled = true;
+
+            // Показываем результат
+            feedback.style.display = 'block';
+
+            if (correct) {
+                feedbackMessage.innerHTML = '🎉 Правильно!';
+                feedback.className = 'alert alert-success text-center mt-4';
+            } else {
+                feedbackMessage.innerHTML = '😕 Неправильно!';
+                feedback.className = 'alert alert-danger text-center mt-4';
+            }
+
+            // Отправляем результат на сервер
+            fetch('/Game/CheckAnswer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    questionId: questionId,
+                    isCorrect: correct,
+                    answerTime: answerTime
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Ответ сервера:', data);
+
+                    if (data.hasNext) {
+                        // Обновляем счёт и прогресс
+                        if (data.score !== undefined) {
+                            scoreDisplay.innerHTML = '⭐ ' + data.score;
+                        }
+                        if (data.currentIndex !== undefined && data.totalQuestions !== undefined) {
+                            document.querySelector('.progress-bar').style.width =
+                                (data.currentIndex * 100 / data.totalQuestions) + '%';
+                            // Обновляем счётчик вопросов
+                            document.querySelector('.badge.bg-info').textContent =
+                                (data.currentIndex + 1) + '/' + data.totalQuestions;
+                        }
+
+                        // === ОБНОВЛЯЕМ ВОПРОС ===
+                        const q = data.question;
+
+                        // Обновляем текст вопроса
+                        document.querySelector('.question-area h2').textContent = q.text;
+
+                        // Обновляем data-атрибуты контейнера для следующего ответа
+                        container.dataset.questionid = q.id;
+                        container.dataset.iscorrect = (q.isTrueStatement !== null)
+                            ? q.isTrueStatement.toString().toLowerCase()
+                            : 'false';
+
+                        // Сбрасываем UI для следующего вопроса
+                        feedback.style.display = 'none';
+                        trueBtn.disabled = false;
+                        falseBtn.disabled = false;
+                        answered = false;
+                        startTime = Date.now();
+
+                        // Прокрутка наверх для удобства
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                    } else {
+                        // Игра закончена — редирект на результаты
+                        setTimeout(function () {
+                            window.location.href = data.redirect;
+                        }, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    setTimeout(function () {
+                        window.location.href = window.location.href;
+                    }, 2000);
+                });
+        }
+
+        // Назначаем обработчики
+        trueBtn.onclick = () => checkAnswer(true);
+        falseBtn.onclick = () => checkAnswer(false);
+    </script>
+}
+
+<style>
+    .btn-game {
+        font-size: 2rem;
+        padding: 1.5rem;
+        border-radius: 60px;
+        border: none;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .btn-game:active {
+            transform: scale(0.95);
+        }
+
+    .btn-true {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+    }
+
+    .btn-false {
+        background: linear-gradient(135deg, #f44336, #d32f2f);
+        box-shadow: 0 5px 15px rgba(244, 67, 54, 0.3);
+    }
+
+    .correct-answer {
+        color: #4CAF50;
+        animation: bounce 0.5s;
+    }
+
+    .incorrect-answer {
+        color: #f44336;
+        animation: shake 0.5s;
+    }
+
+    @@keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    @@keyframes shake {
+        0%, 100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-10px);
+        }
+
+        75% {
+            transform: translateX(10px);
+        }
+    }
+
+    .game-image {
+        max-height: 200px;
+        border-radius: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+</style>

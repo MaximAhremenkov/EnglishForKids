@@ -1,0 +1,12 @@
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Data\bin\Debug\net5.0\EnglishForKids.Data.deps.json
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Data\bin\Debug\net5.0\EnglishForKids.Data.dll
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Data\bin\Debug\net5.0\ref\EnglishForKids.Data.dll
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Data\bin\Debug\net5.0\EnglishForKids.Data.pdb
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Data\obj\Debug\net5.0\EnglishForKids.Data.csproj.AssemblyReference.cache
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Data\obj\Debug\net5.0\EnglishForKids.Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Data\obj\Debug\net5.0\EnglishForKids.Data.AssemblyInfoInputs.cache
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Data\obj\Debug\net5.0\EnglishForKids.Data.AssemblyInfo.cs
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Data\obj\Debug\net5.0\EnglishForKids.Data.csproj.CoreCompileInputs.cache
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Data\obj\Debug\net5.0\EnglishForKids.Data.dll
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Data\obj\Debug\net5.0\ref\EnglishForKids.Data.dll
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Data\obj\Debug\net5.0\EnglishForKids.Data.pdb

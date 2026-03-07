@@ -1,0 +1,62 @@
+﻿@model EnglishForKids.Web.ViewModels.TopicAdminViewModel
+@{
+    ViewData["Title"] = "Создание темы";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4>➕ Создание новой темы</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Название темы</label>
+                            <input asp-for="Title" class="form-control form-control-lg" required />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Описание</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" required></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CategoryId" class="form-label">Категория</label>
+                                <select asp-for="CategoryId" class="form-select">
+                                    @foreach (var cat in Model.Categories)
+                                    {
+                                        <option value="@cat.Id">@cat.Name</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Order" class="form-label">Порядок отображения</label>
+                                <input asp-for="Order" type="number" class="form-control" min="1" value="1" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="IconUrl" class="form-label">URL иконки</label>
+                            <input asp-for="IconUrl" class="form-control" placeholder="/images/topics/default.png" />
+                            <small class="text-muted">Оставьте пустым для иконки по умолчанию</small>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">✅ Создать</button>
+                            <a href="/Admin/Topics" class="btn btn-secondary btn-lg">↩️ Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

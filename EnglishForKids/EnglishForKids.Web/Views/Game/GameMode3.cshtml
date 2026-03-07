@@ -1,0 +1,455 @@
+﻿@model EnglishForKids.Web.ViewModels.GameViewModel
+@{
+    ViewData["Title"] = "Вставь пропущенную букву";
+}
+
+@functions {
+    string GetWordWithoutHint(string wordWithBlanks)
+    {
+        return wordWithBlanks.Split('(')[0].Trim();
+    }
+
+    string GetHint(string wordWithBlanks)
+    {
+        var parts = wordWithBlanks.Split('(');
+        if (parts.Length > 1)
+        {
+            return parts[1].Replace(")", "");
+        }
+        return "";
+    }
+
+    List<string> GetLettersForWord(string wordWithBlanks)
+    {
+        var result = new List<string>();
+        var word = GetWordWithoutHint(wordWithBlanks);
+
+        foreach (char c in word)
+        {
+            if (c == '_')
+                result.Add("_");
+            else if (c != ' ')
+                result.Add(c.ToString().ToUpper());
+        }
+        return result;
+    }
+
+    string GetMissingLetter(string wordWithBlanks)
+    {
+        var hint = GetHint(wordWithBlanks).ToLower();
+
+        // Словарь для русских подсказок
+        var russianMap = new Dictionary<string, string>
+    {
+        { "кот", "A" }, { "собака", "O" }, { "крыса", "A" }, { "лиса", "O" },
+        { "медведь", "E" }, { "волк", "O" }, { "лягушка", "O" }, { "свинья", "I" },
+        { "корова", "O" }, { "курица", "E" }, { "машина", "A" }, { "автобус", "U" },
+        { "мяч", "A" }, { "кукла", "O" }, { "ручка", "E" }, { "сумка", "A" },
+        { "чашка", "U" }, { "коробка", "O" }, { "ключ", "E" }, { "книга", "O" },
+        { "яблоко", "P" }, { "банан", "A" }, { "апельсин", "R" }, { "лимон", "E" },
+        { "хлеб", "R" }, { "молоко", "I" }, { "сыр", "H" }, { "яйцо", "G" },
+        { "красный", "E" }, { "синий", "L" }, { "зеленый", "R" }, { "желтый", "E" },
+        { "черный", "L" }, { "белый", "H" }, { "оранжевый", "R" }, { "фиолетовый", "U" },
+        { "розовый", "I" }, { "коричневый", "R" }
+    };
+
+        // Словарь для английских подсказок
+        var englishMap = new Dictionary<string, string>
+    {
+        { "cat", "A" }, { "dog", "O" }, { "rat", "A" }, { "fox", "O" },
+        { "bear", "E" }, { "wolf", "O" }, { "frog", "O" }, { "pig", "I" },
+        { "cow", "O" }, { "hen", "E" }, { "car", "A" }, { "bus", "U" },
+        { "ball", "A" }, { "doll", "O" }, { "pen", "E" }, { "bag", "A" },
+        { "cup", "U" }, { "box", "O" }, { "key", "E" }, { "book", "O" },
+        { "apple", "P" }, { "banana", "A" }, { "orange", "R" }, { "lemon", "E" },
+        { "bread", "R" }, { "milk", "I" }, { "cheese", "H" }, { "egg", "G" },
+        { "red", "E" }, { "blue", "L" }, { "green", "R" }, { "yellow", "E" },
+        { "black", "L" }, { "white", "H" }, { "purple", "U" }, { "pink", "I" },
+        { "brown", "R" }
+    };
+
+        // Ищем в русском словаре
+        foreach (var pair in russianMap)
+        {
+            if (hint.Contains(pair.Key))
+            {
+                return pair.Value;
+            }
+        }
+
+        // Ищем в английском словаре
+        foreach (var pair in englishMap)
+        {
+            if (hint.Contains(pair.Key))
+            {
+                return pair.Value;
+            }
+        }
+
+        return "A";
+    }
+
+    List<string> GetOptionsForWord(string wordWithBlanks)
+    {
+        var correctLetter = GetMissingLetter(wordWithBlanks);
+
+        var allOptions = new List<string> { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+                                           "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
+
+        var options = new List<string> { correctLetter };
+        var random = new Random();
+        var otherLetters = allOptions.Where(l => l != correctLetter).OrderBy(x => random.Next()).Take(3).ToList();
+        options.AddRange(otherLetters);
+
+        return options.OrderBy(x => random.Next()).ToList();
+    }
+}
+
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>@Model.TopicTitle</h2>
+                <div>
+                    <span class="badge bg-warning fs-4" id="scoreDisplay">⭐ @Model.Score</span>
+                    <span class="badge bg-info fs-4" id="questionCounter">@(Model.CurrentQuestionIndex+1)/@Model.TotalQuestions</span>
+                </div>
+            </div>
+
+            <div class="progress mb-4">
+                <div class="progress-bar" id="progressBar" style="width: @((Model.CurrentQuestionIndex) * 100.0 / Model.TotalQuestions)%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container" data-questionid="@Model.CurrentQuestion.Id">
+        <div class="question-area text-center">
+            <!-- Английское слово крупно, без скобок -->
+            <div class="spelling-word display-1 mb-4" id="wordDisplay">
+                @GetWordWithoutHint(Model.CurrentQuestion.Text)
+            </div>
+
+            <!-- Перевод снизу, мелким шрифтом -->
+            <p class="text-muted mb-4" id="hint" style="font-size: 1.5rem;">
+                @GetHint(Model.CurrentQuestion.Text)
+            </p>
+        </div>
+
+        <div class="letters-container text-center mb-4" id="lettersContainer">
+            @{
+                var letters = GetLettersForWord(Model.CurrentQuestion.Text);
+            }
+            @foreach (var letter in letters)
+            {
+                if (letter == "_")
+                {
+                    <span class="letter-box empty">?</span>
+                }
+                else
+                {
+                    <span class="letter-box">@letter</span>
+                }
+            }
+        </div>
+
+        <div class="options-container text-center mt-4">
+            <h4 class="mb-3">Выбери пропущенную букву:</h4>
+            <div class="d-flex justify-content-center gap-3 flex-wrap" id="options">
+                @{
+                    var options = GetOptionsForWord(Model.CurrentQuestion.Text);
+                }
+                @foreach (var opt in options)
+                {
+                    <button class="option-btn btn btn-warning btn-lg" data-option="@opt">@opt</button>
+                }
+            </div>
+        </div>
+
+        <div id="feedback" class="text-center mt-4" style="display: none;">
+            <h2 id="feedbackMessage"></h2>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const container = document.getElementById('game-container');
+        const wordDisplay = document.getElementById('wordDisplay');
+        const hint = document.getElementById('hint');
+        const lettersContainer = document.getElementById('lettersContainer');
+        const optionsContainer = document.getElementById('options');
+        const feedback = document.getElementById('feedback');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const progressBar = document.getElementById('progressBar');
+        const questionCounter = document.getElementById('questionCounter');
+
+        let currentQuestionId = parseInt(container.dataset.questionid);
+        let correctAnswer = findMissingLetter(wordDisplay.textContent, hint.textContent);
+        let answered = false;
+        let startTime = Date.now();
+
+        optionsContainer.addEventListener('click', function (e) {
+            const button = e.target.closest('.option-btn');
+            if (button && !answered) {
+                checkAnswer(button);
+            }
+        });
+
+        function findMissingLetter(wordText, hintText) {
+            hintText = hintText.toLowerCase();
+
+            const mappings = {
+                'кот': 'A', 'cat': 'A',
+                'собака': 'O', 'dog': 'O',
+                'крыса': 'A', 'rat': 'A',
+                'лиса': 'O', 'fox': 'O',
+                'медведь': 'E', 'bear': 'E',
+                'волк': 'O', 'wolf': 'O',
+                'лягушка': 'O', 'frog': 'O',
+                'свинья': 'I', 'pig': 'I',
+                'корова': 'O', 'cow': 'O',
+                'курица': 'E', 'hen': 'E',
+                'машина': 'A', 'car': 'A',
+                'автобус': 'U', 'bus': 'U',
+                'мяч': 'A', 'ball': 'A',
+                'кукла': 'O', 'doll': 'O',
+                'ручка': 'E', 'pen': 'E',
+                'сумка': 'A', 'bag': 'A',
+                'чашка': 'U', 'cup': 'U',
+                'коробка': 'O', 'box': 'O',
+                'ключ': 'E', 'key': 'E',
+                'книга': 'O', 'book': 'O',
+                'яблоко': 'P', 'apple': 'P',
+                'банан': 'A', 'banana': 'A',
+                'апельсин': 'R', 'orange': 'R',
+                'лимон': 'E', 'lemon': 'E',
+                'хлеб': 'R', 'bread': 'R',
+                'молоко': 'I', 'milk': 'I',
+                'сыр': 'H', 'cheese': 'H',
+                'яйцо': 'G', 'egg': 'G',
+                'красный': 'E', 'red': 'E',
+                'синий': 'L', 'blue': 'L',
+                'зеленый': 'R', 'green': 'R',
+                'желтый': 'E', 'yellow': 'E',
+                'черный': 'L', 'black': 'L',
+                'белый': 'H', 'white': 'H',
+                'оранжевый': 'R', 'orange': 'R',
+                'фиолетовый': 'U', 'purple': 'U',
+                'розовый': 'I', 'pink': 'I',
+                'коричневый': 'R', 'brown': 'R'
+            };
+
+            for (let [key, value] of Object.entries(mappings)) {
+                if (hintText.includes(key)) {
+                    return value;
+                }
+            }
+
+            return 'A';
+        }
+
+        function checkAnswer(selectedButton) {
+            answered = true;
+            const answerTime = Math.floor((Date.now() - startTime) / 1000);
+            const selectedLetter = selectedButton.dataset.option;
+            const isCorrect = selectedLetter === correctAnswer;
+
+            document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+
+            if (isCorrect) {
+                selectedButton.classList.add('btn-success');
+                selectedButton.classList.remove('btn-warning');
+
+                document.querySelectorAll('.letter-box.empty').forEach(box => {
+                    box.textContent = correctAnswer;
+                    box.classList.remove('empty');
+                    box.classList.add('correct');
+                });
+            } else {
+                selectedButton.classList.add('btn-danger');
+                selectedButton.classList.remove('btn-warning');
+
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    if (btn.dataset.option === correctAnswer) {
+                        btn.classList.add('btn-success');
+                        btn.classList.remove('btn-warning');
+                    }
+                });
+
+                document.querySelectorAll('.letter-box.empty').forEach(box => {
+                    box.textContent = correctAnswer;
+                    box.classList.remove('empty');
+                    box.classList.add('incorrect');
+                });
+            }
+
+            feedback.style.display = 'block';
+            feedback.className = isCorrect ? 'alert alert-success text-center mt-4' : 'alert alert-danger text-center mt-4';
+            feedbackMessage.innerHTML = isCorrect ? '🎉 Правильно!' : '😕 Неправильно! Правильная буква: ' + correctAnswer;
+
+            fetch('/Game/CheckAnswer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    questionId: currentQuestionId,
+                    isCorrect: isCorrect,
+                    answerTime: answerTime
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.score !== undefined) {
+                            scoreDisplay.innerHTML = '⭐ ' + data.score;
+                        }
+                        if (data.currentIndex !== undefined && data.totalQuestions !== undefined) {
+                            progressBar.style.width = (data.currentIndex * 100 / data.totalQuestions) + '%';
+                            questionCounter.textContent = (data.currentIndex + 1) + '/' + data.totalQuestions;
+                        }
+
+                        if (data.hasNext) {
+                            setTimeout(() => updateQuestion(data.question), 1500);
+                        } else {
+                            setTimeout(() => window.location.href = data.redirect, 2000);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    setTimeout(() => location.reload(), 2000);
+                });
+        }
+
+        function updateQuestion(question) {
+            currentQuestionId = question.id;
+            const fullText = question.text;
+            const wordPart = fullText.split('(')[0].trim();
+            const hintPart = fullText.includes('(') ? fullText.match(/\((.*?)\)/)[1] : '';
+
+            correctAnswer = findMissingLetter(wordPart, hintPart);
+
+            wordDisplay.textContent = wordPart;
+            hint.textContent = hintPart;
+
+            lettersContainer.innerHTML = '';
+            for (let char of wordPart) {
+                if (char !== ' ') {
+                    const span = document.createElement('span');
+                    if (char === '_') {
+                        span.className = 'letter-box empty';
+                        span.textContent = '?';
+                    } else {
+                        span.className = 'letter-box';
+                        span.textContent = char;
+                    }
+                    lettersContainer.appendChild(span);
+                }
+            }
+
+            const options = generateOptions(correctAnswer);
+            optionsContainer.innerHTML = '';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn btn btn-warning btn-lg';
+                btn.dataset.option = opt;
+                btn.textContent = opt;
+                optionsContainer.appendChild(btn);
+            });
+
+            feedback.style.display = 'none';
+            answered = false;
+            startTime = Date.now();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function generateOptions(correctLetter) {
+            const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            const options = [correctLetter];
+
+            while (options.length < 4) {
+                const randomLetter = allLetters[Math.floor(Math.random() * 26)];
+                if (!options.includes(randomLetter)) {
+                    options.push(randomLetter);
+                }
+            }
+
+            return options.sort(() => Math.random() - 0.5);
+        }
+    </script>
+}
+
+<style>
+    .letter-box {
+        display: inline-block;
+        width: 70px;
+        height: 70px;
+        margin: 5px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        border-radius: 15px;
+        line-height: 70px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+        .letter-box.empty {
+            background: white;
+            border: 3px dashed #ff6b6b;
+            color: #ff6b6b;
+            animation: pulse 1.5s infinite;
+        }
+
+        .letter-box.correct {
+            background: #4CAF50;
+        }
+
+        .letter-box.incorrect {
+            background: #f44336;
+        }
+
+    .spelling-word {
+        font-family: 'Courier New', monospace;
+        letter-spacing: 10px;
+        font-size: 4rem;
+    }
+
+    .option-btn {
+        min-width: 80px;
+        height: 80px;
+        font-size: 2.5rem;
+        font-weight: bold;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+        .option-btn:active {
+            transform: scale(0.95);
+        }
+
+    .btn-success {
+        background: #4CAF50 !important;
+        border-color: #4CAF50 !important;
+    }
+
+    .btn-danger {
+        background: #f44336 !important;
+        border-color: #f44336 !important;
+    }
+
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>

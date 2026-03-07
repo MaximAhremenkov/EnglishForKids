@@ -1,0 +1,191 @@
+﻿@model EnglishForKids.Data.Entities.ChildProfile
+
+@{
+    ViewData["Title"] = "Привет, " + Model.Name;
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="topic-card text-center">
+                <img src="@Model.AvatarUrl" alt="@Model.Name" class="avatar-circle mx-auto mb-3">
+                <h2>@Model.Name</h2>
+                <p class="lead">@Model.Age лет, @Model.Grade класс</p>
+
+                @if (Model.VirtualPet != null)
+                {
+                    <div class="pet-card mt-3 p-3 bg-light rounded">
+                        <h4>Мой питомец 🐶</h4>
+                        <img src="/images/pets/@(Model.VirtualPet.PetType).png" alt="Питомец" style="max-width: 100px;">
+                        <p>Уровень: @Model.VirtualPet.Level</p>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: @Model.VirtualPet.Happiness%">
+                                Счастье
+                            </div>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" style="width: @Model.VirtualPet.Food%">
+                                Сытость
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="question-area">
+                <h3>🎯 Продолжить обучение</h3>
+
+                @if (Model.Progresses.Any())
+                {
+                    var lastTopic = Model.Progresses.OrderByDescending(p => p.LastAccessed).First();
+                    <div class="topic-card mb-3">
+                        <h4>@lastTopic.Topic.Title</h4>
+                        <p>Прогресс: @lastTopic.CorrectAnswers/@lastTopic.TotalQuestions</p>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" style="width: @(lastTopic.CorrectAnswers * 100.0 / (lastTopic.TotalQuestions == 0 ? 1 : lastTopic.TotalQuestions))%"></div>
+                        </div>
+                        <a href="/Topic/Details/@lastTopic.TopicId" class="btn btn-success btn-lg">Продолжить 🚀</a>
+                    </div>
+                }
+                else
+                {
+                    <p>Начни свое первое приключение!</p>
+                    <a href="/Topic" class="btn btn-success btn-lg">Выбрать тему 📚</a>
+                }
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-6">
+                    <div class="topic-card text-center">
+                        <div class="topic-icon mx-auto">📊</div>
+                        <h4>Мой прогресс</h4>
+                        <p>Тем пройдено: @Model.Progresses.Count(p => p.IsCompleted)</p>
+
+                        @if (Model.UserAnswers != null && Model.UserAnswers.Any())
+                        {
+                            <p>Всего ответов: @Model.UserAnswers.Count</p>
+                            <p>Правильных: @Model.UserAnswers.Count(u => u.IsCorrect)</p>
+                        }
+                        else
+                        {
+                            <p>Всего ответов: 0</p>
+                            <p>Правильных: 0</p>
+                            <p class="text-muted">Начни играть, чтобы появилась статистика!</p>
+                        }
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="topic-card text-center">
+                        <div class="topic-icon mx-auto">🏆</div>
+                        <h4>Достижения</h4>
+                        <p>Звезд заработано: @Model.Progresses.Sum(p => p.StarsEarned)</p>
+                        <div class="d-flex justify-content-center gap-2">
+                            @for (int i = 0; i < Model.Progresses.Sum(p => p.StarsEarned); i++)
+                            {
+                                <span class="star">⭐</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="question-area">
+                        <h3 class="mb-4">🏆 Мои достижения</h3>
+                        <div class="achievements-grid" id="achievementsList">
+                            <!-- Сюда будут загружаться достижения -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @section Scripts {
+                <script>
+        // Загрузка достижений
+        fetch('/Achievement/GetEarned')
+            .then(response => response.json())
+            .then(achievements => {
+                const container = document.getElementById('achievementsList');
+
+                if (achievements.length === 0) {
+                    container.innerHTML = '<p class="text-muted">Пока нет достижений. Играй и получай награды! 🌟</p>';
+                    return;
+                }
+
+                achievements.forEach(ach => {
+                    const card = document.createElement('div');
+                    card.className = 'achievement-card';
+                    card.innerHTML = `
+                        <div class="achievement-icon">
+                            <img src="${ach.iconUrl}" alt="${ach.title}">
+                        </div>
+                        <div class="achievement-info">
+                            <h4>${ach.title}</h4>
+                            <p>${ach.description}</p>
+                            <small>Получено: ${new Date(ach.earnedDate).toLocaleDateString()}</small>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+                </script>
+            }
+
+            <style>
+                .achievements-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                    gap: 20px;
+                }
+
+                .achievement-card {
+                    background: white;
+                    border-radius: 20px;
+                    padding: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 15px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                    transition: all 0.3s ease;
+                }
+
+                    .achievement-card:hover {
+                        transform: translateY(-5px);
+                        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+                    }
+
+                .achievement-icon {
+                    width: 60px;
+                    height: 60px;
+                    background: linear-gradient(135deg, #FFD966, #FFB347);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                    .achievement-icon img {
+                        max-width: 40px;
+                    }
+
+                .achievement-info h4 {
+                    margin: 0;
+                    font-size: 1.1rem;
+                }
+
+                .achievement-info p {
+                    margin: 5px 0;
+                    font-size: 0.9rem;
+                    color: #666;
+                }
+
+                .achievement-info small {
+                    color: #999;
+                }
+            </style>
+        </div>
+    </div>
+</div>

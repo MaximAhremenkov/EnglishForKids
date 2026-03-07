@@ -1,0 +1,69 @@
+﻿@model EnglishForKids.Data.Entities.Topic
+
+@{
+    ViewData["Title"] = "Выбери игру - " + (Model?.Title ?? "Неизвестная тема");
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">@(Model?.Title ?? "Тема не найдена")</h1>
+    <p class="text-center lead mb-5">@(Model?.Description ?? "")</p>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-warning text-center">
+            @TempData["Error"]
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="topic-card text-center">
+                <div class="topic-icon mx-auto">✅❌</div>
+                <h3>Правда или Ложь</h3>
+                <p class="mb-3">Прочитай утверждение и выбери, правда это или ложь</p>
+                <a href="@Url.Action("Play", new { topicId = Model?.Id, mode = 1 })"
+                   class="btn btn-success btn-game w-100">Играть</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="topic-card text-center">
+                <div class="topic-icon mx-auto">❓</div>
+                <h3>Выбери ответ</h3>
+                <p class="mb-3">Выбери правильный вариант из нескольких ответов</p>
+                <a href="@Url.Action("Play", new { topicId = Model?.Id, mode = 2 })"
+                   class="btn btn-warning btn-game w-100">Играть</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="topic-card text-center">
+                <div class="topic-icon mx-auto">📝</div>
+                <h3>Вставь букву</h3>
+                <p class="mb-3">Вставь пропущенную букву в слове</p>
+                <a href="@Url.Action("Play", new { topicId = Model?.Id, mode = 3 })"
+                   class="btn btn-info btn-game w-100">Играть</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="topic-card text-center">
+                <div class="topic-icon mx-auto">🔄</div>
+                <h3>Перевод</h3>
+                <p class="mb-3">Найди правильный перевод слова</p>
+                <a href="@Url.Action("Play", new { topicId = Model?.Id, mode = 4 })"
+                   class="btn btn-primary btn-game w-100">Играть</a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="topic-card text-center">
+                <div class="topic-icon mx-auto">🧩</div>
+                <h3>Составь предложение</h3>
+                <p class="mb-3">Собери слова в правильном порядке</p>
+                <a href="@Url.Action("Play", new { topicId = Model?.Id, mode = 5 })"
+                   class="btn btn-secondary btn-game w-100">Играть</a>
+            </div>
+        </div>
+    </div>
+</div>

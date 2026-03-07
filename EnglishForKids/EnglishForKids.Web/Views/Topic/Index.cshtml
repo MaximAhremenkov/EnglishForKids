@@ -1,0 +1,36 @@
+﻿@model IEnumerable<EnglishForKids.Data.Entities.Topic>
+
+@{
+    ViewData["Title"] = "Темы для изучения";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-5">📚 Выбери тему для изучения</h1>
+
+    <div class="row">
+        @foreach (var topic in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card topic-card h-100">
+                    <div class="card-body text-center">
+                        <div class="topic-icon mx-auto mb-3">
+                            @if (!string.IsNullOrEmpty(topic.IconUrl))
+                            {
+                                <img src="@topic.IconUrl" alt="@topic.Title" style="max-width: 80px;">
+                            }
+                            else
+                            {
+                                <span>📘</span>
+                            }
+                        </div>
+                        <h5 class="card-title">@topic.Title</h5>
+                        <p class="card-text text-muted">@topic.Description</p>
+                        <a href="@Url.Action("Details", new { id = topic.Id })" class="btn btn-success btn-lg w-100">
+                            Начать 🚀
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,102 @@
+﻿@model IEnumerable<EnglishForKids.Data.Entities.Topic>
+@{
+    ViewData["Title"] = "Управление темами";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>📚 Управление темами</h1>
+        <a href="/Admin/CreateTopic" class="btn btn-success btn-lg">➕ Создать тему</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Название</th>
+                        <th>Описание</th>
+                        <th>Категория</th>
+                        <th>Порядок</th>
+                        <th>Иконка</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var topic in Model)
+                    {
+                        <tr>
+                            <td>@topic.Id</td>
+                            <td>@topic.Title</td>
+                            <td>@topic.Description</td>
+                            <td>@topic.Category?.Name</td>
+                            <td>@topic.Order</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(topic.IconUrl))
+                                {
+                                    <img src="@topic.IconUrl" alt="@topic.Title" style="max-height: 30px;">
+                                }
+                            </td>
+                            <td>
+                                <a href="/Admin/EditTopic/@topic.Id" class="btn btn-sm btn-primary">✏️ Ред.</a>
+                                <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete(@topic.Id)">🗑️ Уд.</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить эту тему?</p>
+                <p class="text-danger">Внимание: тема не должна содержать вопросов!</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post" action="/Admin/DeleteTopic">
+                    <input type="hidden" name="id" id="deleteId" value="" />
+                    @Html.AntiForgeryToken()
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id) {
+            document.getElementById('deleteId').value = id;
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+}
