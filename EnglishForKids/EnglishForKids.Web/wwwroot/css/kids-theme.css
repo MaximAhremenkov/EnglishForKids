@@ -22,7 +22,6 @@ body {
 
 .topic-card {
     background: white;
-    border-radius: 30px;
     padding: 1.5rem;
     box-shadow: 0 15px 25px rgba(0,0,0,0.1);
     transition: transform 0.3s, box-shadow 0.3s;
@@ -39,7 +38,6 @@ body {
     width: 100px;
     height: 100px;
     background: var(--primary-pastel);
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;

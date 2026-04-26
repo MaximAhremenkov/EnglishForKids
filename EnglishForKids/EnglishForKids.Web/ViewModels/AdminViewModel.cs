@@ -85,4 +85,28 @@ namespace EnglishForKids.Web.ViewModels
         [Display(Name = "Порядок")]
         public int Order { get; set; }
     }
+
+    public class RuleAdminViewModel
+    {
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "Выберите тему")]
+        [Display(Name = "Тема")]
+        public int TopicId { get; set; }
+
+        [Required(ErrorMessage = "Введите название правила")]
+        [Display(Name = "Название правила")]
+        public string Title { get; set; }
+
+        [Display(Name = "Текст теории")]
+        public string TheoryText { get; set; }
+
+        [Display(Name = "Примеры")]
+        public string ExampleText { get; set; }
+
+        [Display(Name = "URL видео (YouTube)")]
+        public string VideoUrl { get; set; }
+
+        public List<Topic> Topics { get; set; }
+    }
 }

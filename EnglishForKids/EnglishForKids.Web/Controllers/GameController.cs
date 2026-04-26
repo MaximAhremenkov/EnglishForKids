@@ -25,6 +25,12 @@ namespace EnglishForKids.Web.Controllers
         // GET: /Game/Index
         public async Task<IActionResult> Index()
         {
+            var childId = HttpContext.Session.GetInt32("ChildId");
+            if (childId == null)
+            {
+                return RedirectToAction("ChildLogin", "Account");
+            }
+
             var topics = await _context.Topics
                 .Include(t => t.Category)
                 .Where(t => t.Questions.Any())
@@ -348,6 +354,23 @@ namespace EnglishForKids.Web.Controllers
             ViewBag.Score = score;
             ViewBag.Stars = stars;
             return View();
+        }
+
+        // GET: /Game/Topics
+        public async Task<IActionResult> Topics()
+        {
+            var childId = HttpContext.Session.GetInt32("ChildId");
+            if (childId == null)
+            {
+                return RedirectToAction("ChildLogin", "Account");
+            }
+
+            var topics = await _context.Topics
+                .Include(t => t.Category)
+                .Where(t => t.Questions.Any())
+                .ToListAsync();
+
+            return View(topics);
         }
 
         private async Task UpdateProgress(int childId, int topicId, bool isCorrect)

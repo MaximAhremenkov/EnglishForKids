@@ -64,24 +64,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    // Анимация маскота
-    const mascot = document.getElementById('mascot');
-    const speech = document.getElementById('mascotSpeech');
-    const phrases = [
-        'Привет!',
-        'Давай учиться!',
-        'Ты молодец!',
-        'Попробуй еще!',
-        'Отлично!'
-    ];
-
-    setInterval(() => {
-        speech.textContent = phrases[Math.floor(Math.random() * phrases.length)];
-        speech.style.display = 'block';
-        setTimeout(() => {
-            speech.style.display = 'none';
-        }, 3000);
-    }, 8000);
-</script>

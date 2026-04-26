@@ -111,3 +111,7 @@ C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\R
 C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\Razor\Views\Admin\CreateOption.cshtml.g.cs
 C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\Razor\Views\Admin\EditQuestion.cshtml.g.cs
 C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\Razor\Views\Admin\EditTopic.cshtml.g.cs
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\Razor\Views\Game\Topics.cshtml.g.cs
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\Razor\Views\Admin\CreateRule.cshtml.g.cs
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\Razor\Views\Admin\EditRule.cshtml.g.cs
+C:\Users\Lenovo\Desktop\EfK\EnglishForKids\EnglishForKids.Web\obj\Debug\net5.0\Razor\Views\Admin\Rules.cshtml.g.cs
