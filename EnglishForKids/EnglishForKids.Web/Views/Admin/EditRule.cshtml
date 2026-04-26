@@ -1,0 +1,70 @@
+﻿@model EnglishForKids.Web.ViewModels.RuleAdminViewModel
+@{
+    ViewData["Title"] = "Редактирование правила";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4>✏️ Редактирование правила</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <input type="hidden" asp-for="Id" />
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="TopicId" class="form-label">Тема</label>
+                            <select asp-for="TopicId" class="form-select" required>
+                                <option value="">Выберите тему</option>
+                                @foreach (var topic in Model.Topics)
+                                {
+                                    <option value="@topic.Id" selected="@(topic.Id == Model.TopicId)">@topic.Title</option>
+                                }
+                            </select>
+                            <span asp-validation-for="TopicId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Название правила</label>
+                            <input asp-for="Title" class="form-control" required />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="TheoryText" class="form-label">Текст теории</label>
+                            <textarea asp-for="TheoryText" class="form-control" rows="6"></textarea>
+                            <small class="text-muted">
+                                💡 Поддерживается HTML: <code>&lt;b&gt;жирный&lt;/b&gt;</code>,
+                                <code>&lt;ul&gt;&lt;li&gt;список&lt;/li&gt;&lt;/ul&gt;</code>
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ExampleText" class="form-label">Примеры</label>
+                            <textarea asp-for="ExampleText" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="VideoUrl" class="form-label">URL видео (YouTube)</label>
+                            <input asp-for="VideoUrl" class="form-control" />
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">💾 Сохранить</button>
+                            <a href="/Admin/Rules" class="btn btn-secondary btn-lg">↩️ Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

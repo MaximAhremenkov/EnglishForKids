@@ -22,7 +22,7 @@
                     <div class="question-area mb-4">
                         <h3>@rule.Title</h3>
                         <div class="rule-content p-3">
-                            <p>@rule.TheoryText</p>
+                            <p>@Html.Raw(rule.TheoryText)</p>
                             <div class="example bg-light p-3 rounded">
                                 <strong>Пример:</strong> @rule.ExampleText
                             </div>

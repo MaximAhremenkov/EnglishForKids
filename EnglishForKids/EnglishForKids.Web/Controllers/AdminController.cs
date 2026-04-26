@@ -381,5 +381,145 @@ namespace EnglishForKids.Web.Controllers
 
             return View(stats);
         }
+
+        // GET: /Admin/Rules
+        public async Task<IActionResult> Rules(int? topicId)
+        {
+            var query = _context.Rules
+                .Include(r => r.Topic)
+                .AsQueryable();
+
+            if (topicId.HasValue && topicId.Value > 0)
+            {
+                query = query.Where(r => r.TopicId == topicId.Value);
+            }
+
+            var rules = await query
+                .OrderBy(r => r.TopicId)
+                .ThenBy(r => r.Id)
+                .ToListAsync();
+
+            ViewBag.Topics = await _context.Topics.ToListAsync();
+            ViewBag.SelectedTopicId = topicId;
+
+            return View(rules);
+        }
+
+        // GET: /Admin/CreateRule
+        public async Task<IActionResult> CreateRule()
+        {
+            var viewModel = new RuleAdminViewModel
+            {
+                Topics = await _context.Topics.ToListAsync()
+            };
+            return View(viewModel);
+        }
+
+        // POST: /Admin/CreateRule
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateRule(RuleAdminViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var rule = new Rule
+                {
+                    TopicId = viewModel.TopicId,
+                    Title = viewModel.Title,
+                    TheoryText = viewModel.TheoryText,
+                    ExampleText = viewModel.ExampleText,
+                    VideoUrl = viewModel.VideoUrl
+                };
+
+                _context.Rules.Add(rule);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Правило успешно создано!";
+                return RedirectToAction("Rules");
+            }
+
+            viewModel.Topics = await _context.Topics.ToListAsync();
+            return View(viewModel);
+        }
+
+        // GET: /Admin/EditRule/5
+        public async Task<IActionResult> EditRule(int id)
+        {
+            var rule = await _context.Rules.FindAsync(id);
+            if (rule == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new RuleAdminViewModel
+            {
+                Id = rule.Id,
+                TopicId = rule.TopicId,
+                Title = rule.Title,
+                TheoryText = rule.TheoryText,
+                ExampleText = rule.ExampleText,
+                VideoUrl = rule.VideoUrl,
+                Topics = await _context.Topics.ToListAsync()
+            };
+
+            return View(viewModel);
+        }
+
+        // POST: /Admin/EditRule
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditRule(RuleAdminViewModel viewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var rule = await _context.Rules.FindAsync(viewModel.Id);
+                if (rule == null)
+                {
+                    return NotFound();
+                }
+
+                rule.TopicId = viewModel.TopicId;
+                rule.Title = viewModel.Title;
+                rule.TheoryText = viewModel.TheoryText;
+                rule.ExampleText = viewModel.ExampleText;
+                rule.VideoUrl = viewModel.VideoUrl;
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Правило успешно обновлено!";
+                return RedirectToAction("Rules");
+            }
+
+            viewModel.Topics = await _context.Topics.ToListAsync();
+            return View(viewModel);
+        }
+
+        // POST: /Admin/DeleteRule
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteRule(int id)
+        {
+            var rule = await _context.Rules
+                .Include(r => r.Questions)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (rule == null)
+            {
+                return NotFound();
+            }
+
+            // Проверяем, есть ли вопросы, привязанные к этому правилу
+            if (rule.Questions != null && rule.Questions.Any())
+            {
+                TempData["Error"] = "Нельзя удалить правило, к которому привязаны вопросы!";
+                return RedirectToAction("Rules");
+            }
+
+            _context.Rules.Remove(rule);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Правило успешно удалено!";
+            return RedirectToAction("Rules");
+        }
     }
 }

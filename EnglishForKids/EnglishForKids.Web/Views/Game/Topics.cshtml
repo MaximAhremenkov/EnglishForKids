@@ -1,0 +1,44 @@
+﻿@model IEnumerable<EnglishForKids.Data.Entities.Topic>
+
+@{
+    ViewData["Title"] = "Выбери игру";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-5">🎮 Выбери тему для игры</h1>
+
+    <div class="row">
+        @foreach (var topic in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="topic-card text-center">
+                    <div class="topic-icon mx-auto">
+                        @if (!string.IsNullOrEmpty(topic.IconUrl))
+                        {
+                            <img src="@topic.IconUrl" alt="@topic.Title" style="max-width: 80px;">
+                        }
+                        else
+                        {
+                            <span>📚</span>
+                        }
+                    </div>
+                    <h3>@topic.Title</h3>
+                    <p class="mb-3 text-muted">@topic.Description</p>
+
+                    <div class="btn-group-vertical w-100">
+                        <a href="@Url.Action("Play", new { topicId = topic.Id, mode = 1 })"
+                           class="btn btn-success mb-2">✅ Правда/Ложь</a>
+                        <a href="@Url.Action("Play", new { topicId = topic.Id, mode = 2 })"
+                           class="btn btn-warning mb-2">❓ Выбери ответ</a>
+                        <a href="@Url.Action("Play", new { topicId = topic.Id, mode = 3 })"
+                           class="btn btn-info mb-2">📝 Вставь букву</a>
+                        <a href="@Url.Action("Play", new { topicId = topic.Id, mode = 4 })"
+                           class="btn btn-primary mb-2">🔄 Перевод</a>
+                        <a href="@Url.Action("Play", new { topicId = topic.Id, mode = 5 })"
+                           class="btn btn-secondary">🧩 Составь предложение</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

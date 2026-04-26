@@ -1,0 +1,154 @@
+﻿@using EnglishForKids.Data.Entities
+@model IEnumerable<Rule>
+@{
+    ViewData["Title"] = "Управление правилами";
+    Layout = "_LayoutAdmin";
+    var topics = ViewBag.Topics as List<Topic>;
+    var selectedTopicId = ViewBag.SelectedTopicId;
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>📖 Управление правилами</h1>
+        <a href="/Admin/CreateRule" class="btn btn-success btn-lg">➕ Создать правило</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Фильтр по теме -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Фильтр по теме</label>
+                    <select name="topicId" class="form-select" onchange="this.form.submit()">
+                        <option value="">Все темы</option>
+                        @foreach (var topic in topics)
+                        {
+                            <option value="@topic.Id" selected="@(selectedTopicId == topic.Id)">@topic.Title</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary">Применить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Тема</th>
+                        <th>Название правила</th>
+                        <th>Теория (кратко)</th>
+                        <th>Видео</th>
+                        <th>Вопросов</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var rule in Model)
+                    {
+                    <tr>
+                        <td>@rule.Id</td>
+                        <td>@rule.Topic?.Title</td>
+                        <td>@rule.Title</td>
+                        <td>
+                            @if (rule.TheoryText != null)
+                            {
+                                // 1. Убираем все HTML-теги из текста
+                                string cleanText = System.Text.RegularExpressions.Regex.Replace(rule.TheoryText, "<[^>]+>", "");
+
+                                // 2. Обрезаем, если слишком длинный
+                                if (cleanText.Length > 50)
+                                {
+                                    @cleanText.Substring(0, 50) <text>...</text>
+                                }
+                                else
+                                {
+                                    @cleanText
+                                }
+                            }
+                        </td>
+                        @*<td>
+            @if (rule.TheoryText != null && rule.TheoryText.Length > 50)
+            {
+                @Html.Raw(rule.TheoryText.Substring(0, 50) + "...")
+            }
+            else
+            {
+                @Html.Raw(rule.TheoryText)
+            }
+        </td>*@
+                        <td>
+                            @if (!string.IsNullOrEmpty(rule.VideoUrl))
+                            {
+                                <a href="@rule.VideoUrl" target="_blank" class="btn btn-sm btn-info">▶️ Смотреть</a>
+                            }
+                        </td>
+                        <td>
+                            <span class="badge bg-info">@(rule.Questions?.Count ?? 0)</span>
+                        </td>
+                        <td>
+                            <a href="/Admin/EditRule/@rule.Id" class="btn btn-sm btn-primary">✏️</a>
+                            <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete(@rule.Id)">🗑️</button>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить это правило?</p>
+                <p class="text-danger">Внимание: правило не должно содержать вопросов!</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post" action="/Admin/DeleteRule">
+                    <input type="hidden" name="id" id="deleteId" value="" />
+                    @Html.AntiForgeryToken()
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id) {
+            document.getElementById('deleteId').value = id;
+            var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+    </script>
+}
